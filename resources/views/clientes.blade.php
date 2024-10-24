@@ -17,32 +17,30 @@
 
 <body>
 
-        <!-- The Modal -->
+    <!-- modal para editar cliente -->
     <div class="modal" id="myModal">
     <div class="modal-dialog">
         <div class="modal-content">
 
-        <!-- Modal Header -->
         <div class="modal-header">
             <h4 class="modal-title">Editar</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
-        <!-- Modal body -->
         <div class="modal-body">
-        <form id="form-cliente-editar" type="POST" href="clientes/update">
+        <form id="form-cliente-edit" type="POST" href="clientes/update">
             @csrf
             <div class="form-group">
                 <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                <input type="text" id="nombre-edit" name="nombre" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-control" required>
+                <input type="email" id="email-edit" name="email" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono</label>
-                <input type="text" id="telefono" name="telefono" class="form-control" required pattern="[0-9]+">
+                <input type="text" id="telefono-edit" name="telefono" class="form-control" required pattern="[0-9]+">
             </div>
             <div class="text-center">
             <button type="submit" class="btn btn-primary mt-2">Guardar</button>
@@ -50,7 +48,6 @@
         </form>
         </div>
 
-        <!-- Modal footer -->
         <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
         </div>
@@ -61,9 +58,9 @@
 
     <div class="container">
 
-        <!-- Sección de Crear o Editar Cliente -->
+        <!-- crear cliente -->
         <div id="form-section" class="card p-4 bg-light mt-4">
-            <h2>Crear/editar cliente</h2>
+            <h2>Crear cliente</h2>
             <form id="form-cliente" type="POST" href="clientes/store">
                 @csrf
                 <div class="form-group">
@@ -84,7 +81,7 @@
             </form>
         </div>
 
-        <!-- Sección de Lista de Clientes -->
+        <!-- lista de clientes -->
         <div id="clientes-section" class="mt-5">
             <h2>Lista de clientes</h2>
             <table class="table">
@@ -97,14 +94,15 @@
                     </tr>
                 </thead>
                 <tbody id="clientes-list">
-                    <!-- Aquí se cargan los clientes -->
+
+
                 </tbody>
             </table>
         </div>
 
-        <!-- Botón y Resultados de API de Pokémon -->
+        <!-- API de pokemon -->
         <div id="pokemon-section" class="card p-4 bg-light mt-4">
-            <h2>Consultar pokemon</h2>
+            <h2>API de pokemon</h2>
             <button id="btn-pokemon" class="btn btn-info">Consultar pokemon</button>
             <div id="pokemon-result" class="mt-3"></div>
         </div>
@@ -113,7 +111,7 @@
     <script>
 
     $(document).ready(function() {
-    // 1. Función para listar clientes
+    //listar clientes
     function listarClientes() {
         $.ajax({
             url: '/clientes/show',
@@ -128,7 +126,7 @@
                             <td>${cliente.email}</td>
                             <td>${cliente.telefono}</td>
                             <td>
-                                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#myModal"
+                                <button type="button" class="btn btn-dark btn-edit" data-bs-toggle="modal" data-bs-target="#myModal"
                                     data-id="${cliente.id}">
                                     Editar
                                 </button>
@@ -144,7 +142,7 @@
         });
     }
 
-    // 2. Función para crear un cliente
+    //crear un cliente
     $('#form-cliente').on('submit', function(e) {
         e.preventDefault();
         const clienteData = {
@@ -160,8 +158,8 @@
             data: clienteData,
             success: function(response) {
                 alert('Cliente creado con éxito');
-                listarClientes(); // Actualiza la lista
-                $('#form-cliente')[0].reset(); // Limpia el formulario
+                listarClientes();
+                $('#form-cliente')[0].reset();
             },
             error: function(response) {
                 console.log('Error al crear el cliente');
@@ -169,7 +167,7 @@
         });
     });
 
-    // 3. Función para editar/actualizar un cliente
+    //actualizar un cliente
     $(document).on('click', '.btn-edit', function() {
         const id = $(this).data('id');
 
@@ -178,11 +176,12 @@
             method: 'POST',
             data: {"_token": "{{csrf_token()}}",id: id},
             success: function(cliente) {
-                $('#nombre').val(cliente.nombre);
-                $('#email').val(cliente.email);
-                $('#telefono').val(cliente.telefono);
-                $('#form-cliente').data('id', cliente.id); // Guardar ID para la actualización
-                $('#form-cliente button').text('Actualizar'); // Cambia el texto del botón
+                $('#nombre-edit').val(cliente.nombre);
+                $('#email-edit').val(cliente.email);
+                $('#telefono-edit').val(cliente.telefono);
+                $('#form-cliente-edit').data('id', cliente.id);
+
+                $('#myModal').modal('show');
             },
             error: function() {
                 console.log('Error al obtener los datos del cliente');
@@ -190,10 +189,10 @@
         });
     });
 
-    // Guardar los cambios de un cliente (actualización)
-    $('#form-cliente').on('submit', function(e) {
+    //guardar los cambios de un cliente
+    $('#form-cliente-edit').on('submit', function(e) {
         e.preventDefault();
-        const id = $(this).data('id'); // Recuperar el ID del cliente a actualizar
+        const id = $(this).data('id');
 
         const clienteData = {
             "_token": "{{csrf_token()}}",
@@ -210,9 +209,9 @@
                 success: function() {
                     alert('Cliente actualizado con éxito');
                     listarClientes();
-                    $('#form-cliente')[0].reset();
-                    $('#form-cliente button').text('Guardar'); // Cambia el texto de nuevo a Guardar
-                    $('#form-cliente').removeData('id'); // Elimina el ID almacenado
+                    $('#form-cliente-edit')[0].reset();
+                    $('#form-cliente-edit button').text('Guardar'); // Cambia el texto de nuevo a Guardar
+                    $('#form-cliente-edit').removeData('id'); // Elimina el ID almacenado
                 },
                 error: function() {
                     console.log('Error al actualizar el cliente');
@@ -221,7 +220,7 @@
         }
     });
 
-    // 4. Función para eliminar un cliente
+    //eliminar un cliente
     $(document).on('click', '.btn-delete', function() {
         const id = $(this).data('id');
 
@@ -241,7 +240,7 @@
         }
     });
 
-    // 5. Función para consumir la API de Pokémon
+    //consultar pokemon
     $('#btn-pokemon').on('click', function() {
         $.ajax({
             url: '/api/pokemon',
@@ -258,7 +257,7 @@
         });
     });
 
-    // Inicializar la lista de clientes al cargar la página
+    //inicializar la lista de clientes
     listarClientes();
 });
 
